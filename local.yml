@@ -1,3 +1,51 @@
+# www.linuxsysadmins.com/ansible-tasks-for-sysadmins-with-examples
+- name: Install system updates for Red Hat systems
+  yum: name=* state=latest update_cache=yes
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  when: ansible_distribution == "Fedora"
+
+#LLTV
+# tasks to complete before running roles
+- hosts: all
+  tags: always
+  become: true
+  pre_tasks:
+    - name: pre-run | update package cache (arch)
+      tags: always
+      pacman: update_cache=yes
+      changed_when: False
+      when: ansible_distribution == "Archlinux"
+
+    - name: pre-run | update package cache (debian, etc)
+      tags: always
+      apt: update_cache=yes
+      changed_when: False
+      when: ansible_distribution in ["Debian", "Ubuntu"]
+
+# run roles
+- hosts: all
+  tags: base
+  become: true
+  roles:
+    - base
+
+- hosts: workstation
+  tags: workstation
+  become: true
+  roles:
+    - workstation
+
+- hosts: server
+  tags: server
+  become: true
+  roles:
+    - server
+
+
+
+#Mine
 - hosts:  localhost
   connection:  local
   become: true
